@@ -1,0 +1,10 @@
+FROM python:3.13-alpine
+# Checar o porquê do slim está com warning
+
+RUN pip install flask socketio
+
+WORKDIR /app
+
+COPY host /app/host
+
+CMD ["python", "/app/host/host.py"]

@@ -1,0 +1,10 @@
+FROM python:3.13-alpine
+# Checar o porquê do slim está com warning
+
+RUN pip install flask socketio networkx
+
+WORKDIR /app
+
+COPY router /app/router
+
+CMD ["python", "/app/router/router.py"]
