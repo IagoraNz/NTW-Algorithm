@@ -1,0 +1,43 @@
+services:
+  router1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.router
+    container_name: router1
+    networks:
+      net:
+        ipv4_address: 172.20.0.2
+
+  router2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.router
+    container_name: router2
+    networks:
+      net:
+        ipv4_address: 172.20.0.3
+
+  host1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: host1
+    networks:
+      net:
+        ipv4_address: 172.20.0.4
+
+  host2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.host
+    container_name: host2
+    networks:
+      net:
+        ipv4_address: 172.20.0.5
+
+networks:
+  net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

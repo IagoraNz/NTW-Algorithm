@@ -1,10 +1,11 @@
 FROM python:3.13-alpine
-# Checar o porquê do slim está com warning
 
-RUN pip install flask socketio networkx
+RUN apk add --no-cache gcc musl-dev python3-dev libffi-dev
 
 WORKDIR /app
 
-COPY router /app/router
+COPY . .
 
-CMD ["python", "/app/router/router.py"]
+RUN pip install --no-cache-dir flask socketio netifaces
+
+CMD ["python", "main.py"]
