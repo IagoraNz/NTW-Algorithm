@@ -1,43 +1,317 @@
 services:
-  router1:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.router
-    container_name: router1
+  h1_1:
+    build: ./host
+    container_name: h1_1
+    image: ntw-algorithm-1-h1_1
     networks:
-      net:
-        ipv4_address: 172.20.0.2
-
-  router2:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.router
-    container_name: router2
+      net_r1_h1:
+        ipv4_address: 172.16.10.100
+  h1_2:
+    build: ./host
+    container_name: h1_2
+    image: ntw-algorithm-1-h1_2
     networks:
-      net:
-        ipv4_address: 172.20.0.3
-
-  host1:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.host
-    container_name: host1
+      net_r1_h2:
+        ipv4_address: 172.16.11.100
+  r1:
+    build: ./router
+    container_name: r1
+    image: ntw-algorithm-1-r1
     networks:
-      net:
-        ipv4_address: 172.20.0.4
-
-  host2:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.host
-    container_name: host2
+      net_r1_h1:
+        ipv4_address: 172.16.10.1
+      net_r1_h2:
+        ipv4_address: 172.16.11.1
+      p2p_r1_r2:
+        ipv4_address: 10.0.100.1
+      p2p_r1_r3:
+        ipv4_address: 10.0.101.1
+      p2p_r1_r4:
+        ipv4_address: 10.0.102.1
+      p2p_r1_r5:
+        ipv4_address: 10.0.103.1
+      p2p_r1_r6:
+        ipv4_address: 10.0.104.1
+  h2_1:
+    build: ./host
+    container_name: h2_1
+    image: ntw-algorithm-1-h2_1
     networks:
-      net:
-        ipv4_address: 172.20.0.5
-
+      net_r2_h1:
+        ipv4_address: 172.16.12.100
+  h2_2:
+    build: ./host
+    container_name: h2_2
+    image: ntw-algorithm-1-h2_2
+    networks:
+      net_r2_h2:
+        ipv4_address: 172.16.13.100
+  r2:
+    build: ./router
+    container_name: r2
+    image: ntw-algorithm-1-r2
+    networks:
+      net_r2_h1:
+        ipv4_address: 172.16.12.1
+      net_r2_h2:
+        ipv4_address: 172.16.13.1
+      p2p_r1_r2:
+        ipv4_address: 10.0.100.2
+      p2p_r2_r4:
+        ipv4_address: 10.0.105.1
+      p2p_r2_r5:
+        ipv4_address: 10.0.106.1
+      p2p_r2_r6:
+        ipv4_address: 10.0.107.1
+  h3_1:
+    build: ./host
+    container_name: h3_1
+    image: ntw-algorithm-1-h3_1
+    networks:
+      net_r3_h1:
+        ipv4_address: 172.16.14.100
+  h3_2:
+    build: ./host
+    container_name: h3_2
+    image: ntw-algorithm-1-h3_2
+    networks:
+      net_r3_h2:
+        ipv4_address: 172.16.15.100
+  r3:
+    build: ./router
+    container_name: r3
+    image: ntw-algorithm-1-r3
+    networks:
+      net_r3_h1:
+        ipv4_address: 172.16.14.1
+      net_r3_h2:
+        ipv4_address: 172.16.15.1
+      p2p_r1_r3:
+        ipv4_address: 10.0.101.2
+      p2p_r3_r5:
+        ipv4_address: 10.0.108.1
+      p2p_r3_r6:
+        ipv4_address: 10.0.109.1
+  h4_1:
+    build: ./host
+    container_name: h4_1
+    image: ntw-algorithm-1-h4_1
+    networks:
+      net_r4_h1:
+        ipv4_address: 172.16.16.100
+  h4_2:
+    build: ./host
+    container_name: h4_2
+    image: ntw-algorithm-1-h4_2
+    networks:
+      net_r4_h2:
+        ipv4_address: 172.16.17.100
+  r4:
+    build: ./router
+    container_name: r4
+    image: ntw-algorithm-1-r4
+    networks:
+      net_r4_h1:
+        ipv4_address: 172.16.16.1
+      net_r4_h2:
+        ipv4_address: 172.16.17.1
+      p2p_r1_r4:
+        ipv4_address: 10.0.102.2
+      p2p_r2_r4:
+        ipv4_address: 10.0.105.2
+      p2p_r4_r5:
+        ipv4_address: 10.0.110.1
+      p2p_r4_r6:
+        ipv4_address: 10.0.111.1
+  h5_1:
+    build: ./host
+    container_name: h5_1
+    image: ntw-algorithm-1-h5_1
+    networks:
+      net_r5_h1:
+        ipv4_address: 172.16.18.100
+  h5_2:
+    build: ./host
+    container_name: h5_2
+    image: ntw-algorithm-1-h5_2
+    networks:
+      net_r5_h2:
+        ipv4_address: 172.16.19.100
+  r5:
+    build: ./router
+    container_name: r5
+    image: ntw-algorithm-1-r5
+    networks:
+      net_r5_h1:
+        ipv4_address: 172.16.18.1
+      net_r5_h2:
+        ipv4_address: 172.16.19.1
+      p2p_r1_r5:
+        ipv4_address: 10.0.103.2
+      p2p_r2_r5:
+        ipv4_address: 10.0.106.2
+      p2p_r3_r5:
+        ipv4_address: 10.0.108.2
+      p2p_r4_r5:
+        ipv4_address: 10.0.110.2
+      p2p_r5_r6:
+        ipv4_address: 10.0.112.1
+  h6_1:
+    build: ./host
+    container_name: h6_1
+    image: ntw-algorithm-1-h6_1
+    networks:
+      net_r6_h1:
+        ipv4_address: 172.16.20.100
+  h6_2:
+    build: ./host
+    container_name: h6_2
+    image: ntw-algorithm-1-h6_2
+    networks:
+      net_r6_h2:
+        ipv4_address: 172.16.21.100
+  r6:
+    build: ./router
+    container_name: r6
+    image: ntw-algorithm-1-r6
+    networks:
+      net_r6_h1:
+        ipv4_address: 172.16.20.1
+      net_r6_h2:
+        ipv4_address: 172.16.21.1
+      p2p_r1_r6:
+        ipv4_address: 10.0.104.2
+      p2p_r2_r6:
+        ipv4_address: 10.0.107.2
+      p2p_r3_r6:
+        ipv4_address: 10.0.109.2
+      p2p_r4_r6:
+        ipv4_address: 10.0.111.2
+      p2p_r5_r6:
+        ipv4_address: 10.0.112.2
 networks:
-  net:
+  net_r1_h1:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+      - subnet: 172.16.10.0/24
+  net_r1_h2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.11.0/24
+  net_r2_h1:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.12.0/24
+  net_r2_h2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.13.0/24
+  net_r3_h1:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.14.0/24
+  net_r3_h2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.15.0/24
+  net_r4_h1:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.16.0/24
+  net_r4_h2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.17.0/24
+  net_r5_h1:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.18.0/24
+  net_r5_h2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.19.0/24
+  net_r6_h1:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.20.0/24
+  net_r6_h2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 172.16.21.0/24
+  p2p_r1_r2:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.100.0/30
+  p2p_r1_r3:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.101.0/30
+  p2p_r1_r4:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.102.0/30
+  p2p_r1_r5:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.103.0/30
+  p2p_r1_r6:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.104.0/30
+  p2p_r2_r4:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.105.0/30
+  p2p_r2_r5:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.106.0/30
+  p2p_r2_r6:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.107.0/30
+  p2p_r3_r5:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.108.0/30
+  p2p_r3_r6:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.109.0/30
+  p2p_r4_r5:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.110.0/30
+  p2p_r4_r6:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.111.0/30
+  p2p_r5_r6:
+    driver: bridge
+    ipam:
+      config:
+      - subnet: 10.0.112.0/30
