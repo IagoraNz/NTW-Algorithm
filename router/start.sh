@@ -6,6 +6,4 @@ if [ -z "$rtr_ip" ]; then
     exit 1
 fi
 
-echo "$rtr_ip"
-
 ip route del default && ip route add default via $rtr_ip && python router.py
