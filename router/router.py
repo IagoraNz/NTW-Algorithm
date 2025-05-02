@@ -6,6 +6,7 @@ import time
 import subprocess
 import json
 from typing import Dict, Tuple, Any
+from dijkstra import dijkstra
 from lsa import LSA
 
 RTR_IP = os.getenv("rtr_ip")
@@ -14,6 +15,126 @@ NGH = json.loads(os.getenv("vizinhanca"))
 PORTA_LSA = 5000
 
 print(NGH)
+
+class Configuracoes:
+    @staticmethod
+    def obter_rotas(rotas: Dict[str, str]) -> Tuple[Dict[str, str], Dict[str, str], Dict[str, str]]:
+            """
+            Obtém todas as rotas existentes no sistema e compara com as novas rotas.
+            
+            Args:
+                rotas: Dicionário com as novas rotas a serem configuradas (destino -> próximo_salto)
+            
+            Returns:
+                Dicionário com as novas rotas a serem adicionadas
+                Dicionário com as rotas a serem removidas
+                Dicionário com as rotas a serem substituídas
+            """
+            rotas_existentes = {}
+            rotas_adicionar = {}
+            rotas_remover = {}
+            rotas_replase = {}
+            
+            try:
+                # Padroniza formato das novas rotas
+                novas_rotas = {}
+                for destino, proximo_salto in rotas.items():
+                    parts = destino.split('.')
+                    network_prefix = '.'.join(parts[:3])
+                    network = f"{network_prefix}.0/24"
+                    novas_rotas[network] = proximo_salto
+                
+                # Obtém rotas existentes do sistema
+                resultado = subprocess.run(
+                    ["ip", "route", "show"],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                
+                # Processa cada linha do resultado
+                for linha in resultado.stdout.splitlines():
+                    partes = linha.split()
+                    
+                    if partes[0] != "default" and partes[1] == "via":
+                        rede = partes[0]  # ex: 172.20.5.0/24
+                        proximo_salto = partes[2]  # ex: 172.20.4.3
+                        rotas_existentes[rede] = proximo_salto
+                        
+                    # elif partes[1] == 'dev':
+                    #     rede = partes[0]
+                    #     proximo_salto = partes[-1]
+                    #     rotas_existentes[rede] = proximo_salto
+                    
+                # Replase rotas que mudaram
+                for rede, proximo_salto in novas_rotas.items():
+                    if (rede in rotas_existentes) and (novas_rotas[rede] != rotas_existentes[rede]):
+                        rotas_replase[rede] = proximo_salto
+                        
+                # Adicionar rotas inexistentes
+                for rede, proximo_salto in novas_rotas.items():
+                    if (rede not in rotas_existentes) and (rede not in rotas_replase):
+                        rotas_adicionar[rede] = proximo_salto
+
+                return rotas_adicionar, rotas_replase    
+            except Exception as e:
+                Log.log(f"Erro ao obter rotas existentes: {e}")
+                return {}, {}
+        
+    @staticmethod
+    def add_rotas(salto: str, destino: str) -> bool:
+        try:
+            p = destino.split('.')
+            prefixo = '.'.join(p[:3])
+            destino = f"{prefixo}.0/24"
+            
+            comando = f"ip route add {destino} via {salto}"
+            processo = subprocess.run(
+                comando.split(),
+                capture_output=True
+            )
+            Log.log(f"[LOG] Rota adicionada com sucesso!")
+        except subprocess.CalledProcessError as error:
+            Log.log(f"[ERROR] Erro ao adicionar rota: {error}")
+        except Exception as e:
+            Log.log(f"[ERROR] Erro ao tentar adicionar rota: {error}")
+    
+    '''
+    EM DESENVOLVIMENTO
+    '''
+    @staticmethod
+    def subst_rotas(salto: str, destino: str) -> bool:
+        try:
+            p = destino.split('.')
+            prefixo = '.'.join(p[:3])
+            destino = f"{prefixo}.0/24"
+            
+            comando = f"ip route replace {destino} via {salto}"
+            processo = subprocess.run(comando.split(), check=True)
+            Log.log(f"[LOG] Rota substituída: {destino} via {salto}") if processo.returncode == 0 else Log.log(f"[LOG] Problema ao substituir rota: {processo.stderr.decode()}")
+            return True
+        except Exception as error:
+            Log.log(f"[LOG] Error de substituicao de rotas: {error}")
+        return False
+    
+    @staticmethod
+    def configurar_inter(lsdb: Dict[str, Any]) -> None:
+        rotas = dijkstra(RTR_IP, lsdb)
+        
+        caminhos = {}
+        for destino, salto in rotas.items():
+            for v, ip_custo in NGH.items():
+                ip, _ = ip_custo
+                if salto == ip:
+                    caminhos[destino] = salto
+                    break
+                
+        add, substituir = Configuracoes.obter_rotas(caminhos)
+        for destino, salto in add.items():
+            Configuracoes.add_rotas(salto, destino)
+                
+        for destino, salto in substituir.items():
+            Configuracoes.subst_rotas(salto, destino)
 
 class Log:
     @staticmethod
@@ -47,6 +168,7 @@ class Roteador:
             with self.thread:
                 self.lsdb[RTR_IP] = pacote
                 self.salvar_lsdb(self.lsdb)
+                Configuracoes.configurar_inter(self.lsdb)
                 
             time.sleep(10)
             
@@ -75,6 +197,7 @@ class Roteador:
                     with self.thread:
                         self.lsdb[origem] = lsa
                         self.salvar_lsdb(self.lsdb)
+                        Configuracoes.configurar_inter(self.lsdb)
                 
                 # Log.log(f"Recebendo pacote dessa origem: {origem}")
             except socket.error as error:
