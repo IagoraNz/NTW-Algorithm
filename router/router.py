@@ -47,6 +47,8 @@ class Roteador:
             with self.thread:
                 self.lsdb[RTR_IP] = pacote
                 self.salvar_lsdb(self.lsdb)
+                
+            time.sleep(10)
             
     def receber_pacotes(self) -> None:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
