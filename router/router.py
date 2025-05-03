@@ -31,20 +31,18 @@ class Configuracoes:
                 Dicionário com as rotas a serem substituídas
             """
             rotas_existentes = {}
-            rotas_adicionar = {}
-            rotas_remover = {}
-            rotas_replase = {}
+            rotas_sistema = {}
+            adicionar = {}
+            substituir = {}
             
             try:
-                # Padroniza formato das novas rotas
                 novas_rotas = {}
                 for destino, proximo_salto in rotas.items():
                     parts = destino.split('.')
-                    network_prefix = '.'.join(parts[:3])
-                    network = f"{network_prefix}.0/24"
+                    prefixo = '.'.join(parts[:3])
+                    network = f"{prefixo}.0/24"
                     novas_rotas[network] = proximo_salto
                 
-                # Obtém rotas existentes do sistema
                 resultado = subprocess.run(
                     ["ip", "route", "show"],
                     capture_output=True,
@@ -52,7 +50,6 @@ class Configuracoes:
                     check=True
                 )
                 
-                # Processa cada linha do resultado
                 for linha in resultado.stdout.splitlines():
                     partes = linha.split()
                     
@@ -61,22 +58,22 @@ class Configuracoes:
                         proximo_salto = partes[2]  # ex: 172.20.4.3
                         rotas_existentes[rede] = proximo_salto
                         
-                    # elif partes[1] == 'dev':
-                    #     rede = partes[0]
-                    #     proximo_salto = partes[-1]
-                    #     rotas_existentes[rede] = proximo_salto
+                    elif partes[1] == 'dev':
+                        rede = partes[0]
+                        proximo_salto = partes[-1]
+                        rotas_sistema[rede] = proximo_salto
                     
                 # Replase rotas que mudaram
                 for rede, proximo_salto in novas_rotas.items():
-                    if (rede in rotas_existentes) and (novas_rotas[rede] != rotas_existentes[rede]):
-                        rotas_replase[rede] = proximo_salto
+                    if (rede in rotas_existentes) and (rotas_existentes[rede] != proximo_salto):
+                        substituir[rede] = proximo_salto
                         
                 # Adicionar rotas inexistentes
                 for rede, proximo_salto in novas_rotas.items():
-                    if (rede not in rotas_existentes) and (rede not in rotas_replase):
-                        rotas_adicionar[rede] = proximo_salto
+                    if (rede not in rotas_existentes) and (rede not in rotas_sistema):
+                        adicionar[rede] = proximo_salto
 
-                return rotas_adicionar, rotas_replase    
+                return adicionar, substituir    
             except Exception as e:
                 Log.log(f"Erro ao obter rotas existentes: {e}")
                 return {}, {}
@@ -99,9 +96,6 @@ class Configuracoes:
         except Exception as e:
             Log.log(f"[ERROR] Erro ao tentar adicionar rota: {error}")
     
-    '''
-    EM DESENVOLVIMENTO
-    '''
     @staticmethod
     def subst_rotas(salto: str, destino: str) -> bool:
         try:
