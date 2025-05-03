@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+if [ -z "$rtr_ip" ]; then
+    echo "A variável rtr_ip não está definida!"
+    exit 1
+fi
+
+ip route del default && ip route add default via $rtr_ip && python host.py
