@@ -108,7 +108,7 @@ if __name__ == "__main__":
         
     sumario = {}
     for de, para, ok, tempo in res:
-        sumario.setdefault(de, []).append((de, ok, tempo))
+        sumario.setdefault(de, []).append((para, ok, tempo))
         
     total_ok = 0
     total = len(res)

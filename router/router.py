@@ -1,10 +1,15 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias e variáveis globais
+'''
+
 import json
 import os
-import socket
-import threading
 import time
+import threading
+import socket
 import subprocess
-import json
 from typing import Dict, Tuple, Any
 from dijkstra import dijkstra
 from lsa import LSA
@@ -14,72 +19,88 @@ RTR_NAME = os.getenv("rtr_nome")
 NGH = json.loads(os.getenv("vizinhanca"))
 PORTA_LSA = 5000
 
-print(NGH)
+# ----------------------------------------------------------------------------------------------------------- #
 
 class Configuracoes:
+    """
+    Classe Configuracoes, responsável por gerenciar as rotas do roteador.
+
+    Returns:
+        None
+    """
     @staticmethod
     def obter_rotas(rotas: Dict[str, str]) -> Tuple[Dict[str, str], Dict[str, str], Dict[str, str]]:
-            """
-            Obtém todas as rotas existentes no sistema e compara com as novas rotas.
+        """
+        Obtém todas as rotas existentes no sistema e compara com as novas rotas.
+        
+        Args:
+            rotas: Dicionário com as novas rotas a serem configuradas (destino -> próximo_salto)
+        
+        Returns:
+            Dicionário com as novas rotas a serem adicionadas
+            Dicionário com as rotas a serem removidas
+            Dicionário com as rotas a serem substituídas
+        """
+        rotas_existentes = {}
+        rotas_sistema = {}
+        adicionar = {}
+        substituir = {}
+        
+        try:
+            novas_rotas = {}
+            for destino, proximo_salto in rotas.items():
+                parts = destino.split('.')
+                prefixo = '.'.join(parts[:3])
+                network = f"{prefixo}.0/24"
+                novas_rotas[network] = proximo_salto
             
-            Args:
-                rotas: Dicionário com as novas rotas a serem configuradas (destino -> próximo_salto)
+            resultado = subprocess.run(
+                ["ip", "route", "show"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
             
-            Returns:
-                Dicionário com as novas rotas a serem adicionadas
-                Dicionário com as rotas a serem removidas
-                Dicionário com as rotas a serem substituídas
-            """
-            rotas_existentes = {}
-            rotas_sistema = {}
-            adicionar = {}
-            substituir = {}
-            
-            try:
-                novas_rotas = {}
-                for destino, proximo_salto in rotas.items():
-                    parts = destino.split('.')
-                    prefixo = '.'.join(parts[:3])
-                    network = f"{prefixo}.0/24"
-                    novas_rotas[network] = proximo_salto
+            for linha in resultado.stdout.splitlines():
+                partes = linha.split()
                 
-                resultado = subprocess.run(
-                    ["ip", "route", "show"],
-                    capture_output=True,
-                    text=True,
-                    check=True
-                )
+                if partes[0] != "default" and partes[1] == "via":
+                    rede = partes[0]  # ex: 172.20.5.0/24
+                    proximo_salto = partes[2]  # ex: 172.20.4.3
+                    rotas_existentes[rede] = proximo_salto
+                    
+                elif partes[1] == 'dev':
+                    rede = partes[0]
+                    proximo_salto = partes[-1]
+                    rotas_sistema[rede] = proximo_salto
                 
-                for linha in resultado.stdout.splitlines():
-                    partes = linha.split()
+            # Replase rotas que mudaram
+            for rede, proximo_salto in novas_rotas.items():
+                if (rede in rotas_existentes) and (rotas_existentes[rede] != proximo_salto):
+                    substituir[rede] = proximo_salto
                     
-                    if partes[0] != "default" and partes[1] == "via":
-                        rede = partes[0]  # ex: 172.20.5.0/24
-                        proximo_salto = partes[2]  # ex: 172.20.4.3
-                        rotas_existentes[rede] = proximo_salto
-                        
-                    elif partes[1] == 'dev':
-                        rede = partes[0]
-                        proximo_salto = partes[-1]
-                        rotas_sistema[rede] = proximo_salto
-                    
-                # Replase rotas que mudaram
-                for rede, proximo_salto in novas_rotas.items():
-                    if (rede in rotas_existentes) and (rotas_existentes[rede] != proximo_salto):
-                        substituir[rede] = proximo_salto
-                        
-                # Adicionar rotas inexistentes
-                for rede, proximo_salto in novas_rotas.items():
-                    if (rede not in rotas_existentes) and (rede not in rotas_sistema):
-                        adicionar[rede] = proximo_salto
+            # Adicionar rotas inexistentes
+            for rede, proximo_salto in novas_rotas.items():
+                if (rede not in rotas_existentes) and (rede not in rotas_sistema):
+                    adicionar[rede] = proximo_salto
 
-                return adicionar, substituir    
-            except Exception as e:
-                Log.log(f"Erro ao obter rotas existentes: {e}")
-                return {}, {}
+            return adicionar, substituir    
+        except Exception as e:
+            Log.log(f"Erro ao obter rotas existentes: {e}")
+            return {}, {}
         
     @staticmethod
     def add_rotas(salto: str, destino: str) -> bool:
+        """
+        Adiciona uma rota ao sistema.
+
+        Args:
+            salto (str): Próximo salto
+            destino (str): Destino da rota
+
+        Returns:
+            bool: True se a rota foi adicionada com sucesso, False caso contrário.
+        """
         try:
             p = destino.split('.')
             prefixo = '.'.join(p[:3])
@@ -98,6 +119,16 @@ class Configuracoes:
     
     @staticmethod
     def subst_rotas(salto: str, destino: str) -> bool:
+        """
+        Substitui uma rota existente no sistema.
+        
+        Args:
+            salto (str): Próximo salto
+            destino (str): Destino da rota
+
+        Returns:
+            bool: True se a rota foi substituída com sucesso, False caso contrário.
+        """
         try:
             p = destino.split('.')
             prefixo = '.'.join(p[:3])
@@ -113,6 +144,16 @@ class Configuracoes:
     
     @staticmethod
     def configurar_inter(lsdb: Dict[str, Any]) -> None:
+        """
+        Configura as rotas do roteador com base na LSDB (Link State Database) recebida.
+        A função utiliza o algoritmo de Dijkstra para calcular os caminhos mais curtos e
+        atualiza as rotas do sistema.
+
+        Args:
+            lsdb (Dict[str, Any]): Dicionário que representa a LSDB (Link State Database).
+                Cada chave é o ID do roteador e o valor é um dicionário com informações sobre o roteador,
+                incluindo a vizinhança.
+        """
         rotas = dijkstra(RTR_IP, lsdb)
         
         caminhos = {}
@@ -131,19 +172,41 @@ class Configuracoes:
             Configuracoes.subst_rotas(salto, destino)
 
 class Log:
+    """
+    Classe Log, responsável por registrar mensagens de log com timestamp.
+    Contém métodos para registrar mensagens de log.
+    """
     @staticmethod
     def log(msg: str) -> None:
+        """
+        Registra uma mensagem de log com timestamp.
+        O timestamp é formatado como "YYYY-MM-DD HH:MM:SS".
+
+        Args:
+            msg (str): Mensagem a ser registrada no log.
+        """
         timestmp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"[{RTR_IP}] {msg} - {timestmp}", flush=True)
 
 class Roteador:
+    """
+    Classe Roteador, responsável por gerenciar a comunicação entre os roteadores.
+    """
     def __init__(self) -> None:
+        """
+        Inicializa a classe Roteador, criando um dicionário para armazenar a LSDB (Link State Database)
+        e um lock para garantir acesso seguro à LSDB durante operações de leitura e escrita.
+        """
         self.lsdb = {}
         self.thread = threading.Lock()
         
-        # Log.log(f"Iniciando o roteador!")
+        Log.log(f"Iniciando o roteador!")
         
     def enviar_pacotes(self) -> None:
+        """
+        Envia pacotes LSA (Link State Advertisement) para os vizinhos a cada 10 segundos.
+        O pacote contém informações sobre o roteador, sua vizinhança e a sequência do pacote.
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sequencia = 0
@@ -157,7 +220,7 @@ class Roteador:
                 ip, custo = ip_custo
             
                 sock.sendto(msg, (ip, PORTA_LSA))
-                # Log.log(f"[{ip}] A mensagem foi enviado com sucesso!")
+                Log.log(f"[{ip}] A mensagem foi enviado com sucesso!")
                 
             with self.thread:
                 self.lsdb[RTR_IP] = pacote
@@ -167,6 +230,11 @@ class Roteador:
             time.sleep(10)
             
     def receber_pacotes(self) -> None:
+        """
+        Recebe pacotes LSA (Link State Advertisement) de outros roteadores.
+        Se o pacote recebido for mais recente do que o armazenado, atualiza a LSDB (Link State Database)
+        e reenvia o pacote para os vizinhos.
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -178,7 +246,7 @@ class Roteador:
         while True:
             try:
                 dado, end = sock.recvfrom(4096)
-                # Log.log(f"Pacote recebido de {end}")
+                Log.log(f"Pacote recebido de {end}")
                 lsa = json.loads(dado.decode())
                 origem = lsa["id"]
                 
@@ -193,7 +261,7 @@ class Roteador:
                         self.salvar_lsdb(self.lsdb)
                         Configuracoes.configurar_inter(self.lsdb)
                 
-                # Log.log(f"Recebendo pacote dessa origem: {origem}")
+                Log.log(f"Recebendo pacote dessa origem: {origem}")
             except socket.error as error:
                 Log.log(f"Erro ao receber LSA: {error}")
             except json.JSONDecodeError:
@@ -201,13 +269,28 @@ class Roteador:
             except Exception as error:
                 Log.log(f"Erro inesperado ao receber LSA: {error}")
           
-    def salvar_lsdb(self, lsdb: Dict[str, Any]):
+    def salvar_lsdb(self, lsdb: Dict[str, Any]) -> None:
+        """
+        Salva a LSDB (Link State Database) em um arquivo JSON.
+        O arquivo é salvo com o nome "lsdb.json" e contém as informações sobre os roteadores e suas vizinhanças.
+
+        Args:
+            lsdb (Dict[str, Any]): Dicionário que representa a LSDB (Link State Database).
+                Cada chave é o ID do roteador e o valor é um dicionário com informações sobre o roteador,
+                incluindo a vizinhança.
+        """
         try:
             with open("lsdb.json", "w") as file:
                 json.dump(lsdb, file, indent=4)
         except Exception as error:
             Log.log(f"[{error}] Erro ao salvar o LSDB")
                
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Execução do roteador
+'''               
+
 if __name__ == "__main__":
     r1 = Roteador()
     

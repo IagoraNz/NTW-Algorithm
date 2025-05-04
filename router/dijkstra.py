@@ -1,7 +1,30 @@
-import os
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias
+'''
+
 from typing import Dict, Tuple, Any
 
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Funções principais
+'''
+
 def dijkstra(origem: str, lsdb: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Implementa o algoritmo de Dijkstra para encontrar o caminho mais curto em um grafo.
+    O grafo é representado por um dicionário onde as chaves são os IDs dos roteadores e os valores são dicionários
+
+    Args:
+        origem (str): ID do roteador de origem.
+        lsdb (Dict[str, Any]): Dicionário que representa a LSDB (Link State Database). 
+        Cada chave é o ID do roteador e o valor é um dicionário com informações sobre o roteador, incluindo a vizinhança.
+
+    Returns:
+        Dict[str, str]: Dicionário onde as chaves são os IDs dos roteadores de destino e os valores são os próximos saltos.
+    """
     grafo = {}
     for idRouter, lsa in lsdb.items():
         vizinhanca = {}
@@ -35,6 +58,12 @@ def dijkstra(origem: str, lsdb: Dict[str, Any]) -> Dict[str, str]:
         
     return tabela
         
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Execução do dijkstra
+'''
+
 if __name__ == "__main__":
     lsdb = {
         "172.20.1.3": {
