@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias e variáveis globais
+'''
+
 import os
 import threading
 import time
@@ -5,18 +11,53 @@ import time
 CONT_CPU = os.cpu_count()
 MAX = CONT_CPU * 4
 
-def pegar_hosts():
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Funções principais
+'''
+
+def pegar_hosts() -> list:
+    """
+    Pega os containers que estão rodando e filtra os que tem o nome 'host'.
+    Retorna uma lista com os nomes dos containers.
+
+    Returns:
+        list: Lista com os nomes dos containers que tem o nome 'host'.
+    """
     saida = os.popen("docker ps --filter 'name=host' --format '{{.Names}}'").read()
     return sorted(saida.splitlines())
 
-def extrair_hosts(nome):
+def extrair_hosts(nome) -> tuple:
+    """
+    Extrai o prefixo e o sufixo do nome do container cujo nome começa com 'host'.
+    
+    Se o nome do container não estiver no formato esperado, retorna None.
+
+    Args:
+        nome (str): Nome do container.
+
+    Returns:
+        tuple: Tupla com o prefixo e o sufixo do nome do container.
+    """
     prefixo = nome.split('-')[-2]
     res = prefixo.split('host')[-1]
     res1 = res[:-1].split('_')[0]
     res2 = res[-1]
     return res1, res2
 
-def ping(de, para, ip, res, thread):
+def ping(de, para, ip, res, thread) -> None:
+    """
+    Executa o comando ping no container de origem (de) para o container de destino (para).
+    O resultado é armazenado na lista res. O tempo de execução é medido e armazenado na lista res.
+
+    Args:
+        de (str): Nome do container de origem.
+        para (str): Nome do container de destino.
+        ip (str): IP do container de destino.
+        res (list): Lista onde o resultado será armazenado.
+        thread (threading.Lock): Lock para garantir acesso seguro à lista res.
+    """
     ini = time.time()
     comando = f"docker exec {de} ping -c 1 -W 0.1 {ip} > /dev/null 2>&1"
     print(f"{comando}")
@@ -27,6 +68,12 @@ def ping(de, para, ip, res, thread):
     
     with thread:
         res.append((de, para, sucesso, tempo))
+        
+# ----------------------------------------------------------------------------------------------------------- #
+ 
+'''
+Execução do script
+'''
         
 if __name__ == "__main__":
     hosts = pegar_hosts()
@@ -65,4 +112,4 @@ if __name__ == "__main__":
             print(f"{de} --> {para}: {tempo:2f} [{status}]")
             total_ok += ok
             
-    print(f"Conexoes que tiveram sucesso: {total_ok}/{total}")   
+    print(f"Conexoes que tiveram sucesso: {total_ok}/{total}")

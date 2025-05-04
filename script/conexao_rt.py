@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Biblitecas necessárias e variáveis globais
+'''
+
 import os
 import threading
 import time
@@ -5,16 +11,50 @@ import time
 CONT_CPU = os.cpu_count()
 MAX = CONT_CPU * 4
 
-def pegar_roteadores():
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Funções principais
+'''
+
+def pegar_roteadores() -> list:
+    """
+    Pega os containers que estão rodando e filtra os que tem o nome 'router'.
+
+    Returns:
+        list: Lista com os nomes dos containers que tem o nome 'router'.
+    """
     saida = os.popen("docker ps --filter 'name=router' --format '{{.Names}}'").read()
     return sorted(saida.splitlines())
 
-def extrair_roteadores(nome):
+def extrair_roteadores(nome) -> str:
+    """
+    Extrai o prefixo e o sufixo do nome do container cujo nome começa com 'router'.
+    
+    Se o nome do container não estiver no formato esperado, retorna None.
+
+    Args:
+        nome (str): Nome do container.
+
+    Returns:
+        str: Sufixo do nome do container.
+    """
     prefixo = nome.split('-')[-2]
     res = prefixo.split('router')[1]
     return res
 
-def ping(de, para, ip, res, thread):
+def ping(de, para, ip, res, thread) -> None:
+    """
+    Executa o comando ping no container de origem (de) para o container de destino (para).
+    O resultado é armazenado na lista res. O tempo de execução é medido e armazenado na lista res.
+
+    Args:
+        de (str): Nome do container de origem.
+        para (str): Nome do container de destino.
+        ip (str): IP do container de destino.
+        res (list): Lista onde o resultado será armazenado.
+        thread (threading.Lock): Lock para garantir acesso seguro à lista res.
+    """
     ini = time.time()
     comando = f"docker exec {de} ping -c 1 -W 0.1 {ip} > /dev/null 2>&1"
     print(f"{comando}")
@@ -25,6 +65,12 @@ def ping(de, para, ip, res, thread):
     
     with thread:
         res.append((de, para, sucesso, tempo))
+        
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Execução do script
+'''
         
 if __name__ == "__main__":
     roteadores = pegar_roteadores()
