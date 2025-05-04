@@ -8,6 +8,15 @@ import os
 import threading
 import time
 
+class Cores:
+    LARANJA = '\033[38;2;224;167;106m'
+    VERDE = '\033[38;2;66;191;161m'
+    ROXO = '\033[38;2;161;114;243m'
+    AZUL = '\033[38;2;114;186;243m'
+    VERMELHO = '\033[38;2;243;138;138m'
+    AMARELO = '\033[38;2;243;228;114m'
+    SEM_COR = '\033[0m'
+
 CONT_CPU = os.cpu_count()
 MAX = CONT_CPU * 4
 
@@ -75,10 +84,12 @@ Execução do script
 if __name__ == "__main__":
     roteadores = pegar_roteadores()
     if not roteadores:
-        print(f"[ERRO] Execute docker compose up --build primeiro!")
+        print(f"{Cores.VERMELHO}[ERRO] Execute docker compose up --build primeiro!")
         exit(1)
     
     tarefas = [(f, t, f"172.20.{extrair_roteadores(t)}.3") for f in roteadores for t in roteadores if f != t]
+    
+    print(f"{Cores.ROXO}Iniciando teste de conectividade entre roteadores...")
     
     res = []
     threads = []
@@ -103,10 +114,10 @@ if __name__ == "__main__":
     total = len(res)
     
     for de in sorted(sumario):
-        print(f"ROTEADOR {de}")
+        print(f"{Cores.AZUL}ROTEADOR {de}{Cores.SEM_COR}")
         for para, ok, tempo in sumario[de]:
-            status = "SUCESSO" if ok else "FALHA"
-            print(f"{de} --> {para}: {tempo:2f} [{status}]")
+            status = f"{Cores.VERDE}[SUCESSO]{Cores.SEM_COR}" if ok else f"{Cores.VERMELHO}[FALHA]{Cores.SEM_COR}"
+            print(f"{de} --> {para}: {tempo:.2f} {status}")
             total_ok += ok
             
     print(f"Conexoes que tiveram sucesso: {total_ok}/{total}")            
