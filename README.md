@@ -47,3 +47,51 @@ A presente topologia pode ser visualizada no network_graph.html do projeto
 ├── 🌐 network_graph.html
 └── 📦 requirements.txt
 ```
+
+## 🔗 Ferramentas utilizadas
+- Python
+```
+Python 3.12.6
+```
+
+- Docker
+```
+Docker version 28.0.4, build b8034c0
+```
+
+## 🔗 Como utilizar o algoritmo
+1. Clone o repositório
+```
+git clone https://github.com/IagoraNz/NTW-Algorithm
+```
+2. Abra o projeto
+```
+cd NTW-Algorithm
+```
+3. Para obter a topologia visualizável em grafo no HTML (será necessário uma extensão para abrir o HTML, como o Live Server ou Five Server)
+```
+python3 gerar_grafo.py
+```
+5. Inicialize a topologia via Docker
+```
+docker compose up --build
+```
+4. Após uma certa quantidade de tempo, cheque a tabela de roteamento da rede
+```
+cd script
+python3 mostrar_rt.py
+```
+5. Teste a conectividade dos roteadores
+```
+cd script
+python3 conexao_rt.py
+```
+6. Teste a conectividade dos hosts
+```
+cd script
+python3 conexao_host.py
+```
+7. Finalize a aplicação
+```
+docker compose down
+```
