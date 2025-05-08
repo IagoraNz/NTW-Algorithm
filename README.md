@@ -95,3 +95,9 @@ python3 conexao_host.py
 ```
 docker compose down
 ```
+
+## 🔗 Justificativa do Uso do Protocolo UDP
+
+O uso do protocolo UDP (User Datagram Protocol) em uma topologia de rede com hosts e roteadores se justifica principalmente por sua leveza e baixa latência. Por não estabelecer conexões nem realizar controle de fluxo ou verificação de entrega, o UDP permite a transmissão rápida de pacotes, sendo ideal para aplicações que priorizam desempenho e tempo real, como streaming, jogos online ou simulações de tráfego. Em ambientes de teste ou simulação, a simplicidade do UDP facilita a análise de comportamento da rede sem a interferência de mecanismos complexos de controle.
+
+Além disso, o UDP é adequado para topologias que envolvem roteadores e múltiplos hosts porque reduz a sobrecarga da rede e do processamento nos dispositivos intermediários. Em muitos casos, a confiabilidade pode ser gerenciada pela aplicação de forma personalizada, permitindo maior flexibilidade no desenvolvimento de soluções específicas. Portanto, sua adoção em cenários de roteamento e comunicação entre nós se mostra eficaz quando a confiabilidade total não é o principal requisito.
