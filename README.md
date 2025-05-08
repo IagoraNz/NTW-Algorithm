@@ -97,7 +97,17 @@ docker compose down
 ```
 
 ## 🔗 Justificativa do Uso do Protocolo UDP
+Justificativa do uso do protocolo UDP em uma topologia de rede com hosts e roteadores:
 
-O uso do protocolo UDP (User Datagram Protocol) em uma topologia de rede com hosts e roteadores se justifica principalmente por sua leveza e baixa latência. Por não estabelecer conexões nem realizar controle de fluxo ou verificação de entrega, o UDP permite a transmissão rápida de pacotes, sendo ideal para aplicações que priorizam desempenho e tempo real, como streaming, jogos online ou simulações de tráfego. Em ambientes de teste ou simulação, a simplicidade do UDP facilita a análise de comportamento da rede sem a interferência de mecanismos complexos de controle.
+* **Baixa latência e simplicidade**:
+  O UDP não realiza controle de conexão, verificação de entrega ou ordenação de pacotes, o que o torna mais leve e rápido. Isso é ideal para aplicações em tempo real, como transmissões multimídia, jogos online ou simulações de rede.
 
-Além disso, o UDP é adequado para topologias que envolvem roteadores e múltiplos hosts porque reduz a sobrecarga da rede e do processamento nos dispositivos intermediários. Em muitos casos, a confiabilidade pode ser gerenciada pela aplicação de forma personalizada, permitindo maior flexibilidade no desenvolvimento de soluções específicas. Portanto, sua adoção em cenários de roteamento e comunicação entre nós se mostra eficaz quando a confiabilidade total não é o principal requisito.
+* **Redução de sobrecarga na rede**:
+  Por dispensar mecanismos de confiabilidade presentes no TCP, o UDP gera menos tráfego e exige menos processamento dos roteadores e hosts, tornando-se mais eficiente em topologias com muitos nós.
+
+* **Adequado para testes e simulações**:
+  Sua simplicidade facilita o desenvolvimento de ambientes de teste e a análise de comportamento da rede sem interferências de protocolos mais complexos.
+
+* **Maior flexibilidade para aplicações**:
+  Como a confiabilidade pode ser tratada pela própria aplicação quando necessário, o uso do UDP permite maior controle sobre o comportamento da comunicação, adaptando-se melhor a diferentes cenários de rede.
+
