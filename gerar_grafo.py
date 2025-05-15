@@ -58,7 +58,7 @@ for node, data in G.nodes(data=True):
     if data['type'] == 'router':
         net.add_node(node, label=node, color='#c4c4c4', size=20)
     else:
-        net.add_node(node, label=node, color='#7efd95', size=20)
+        net.add_node(node, label=node, color='#cfdcef', size=20)
 
 for u, v in G.edges():
     net.add_edge(u, v)

@@ -115,7 +115,7 @@ if __name__ == "__main__":
     total = len(res)
     
     for de in sorted(sumario):
-        print(f"ROTEADOR {de}")
+        print(f"HOST {de}")
         for para, ok, tempo in sumario[de]:
             status = "SUCESSO" if ok else "FALHA"
             print(f"{de} --> {para}: {tempo:2f} [{status}]")
