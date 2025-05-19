@@ -74,7 +74,7 @@ class Configuracoes:
                     proximo_salto = partes[-1]
                     rotas_sistema[rede] = proximo_salto
                 
-            # Replase rotas que mudaram
+            # Replace rotas que mudaram
             for rede, proximo_salto in novas_rotas.items():
                 if (rede in rotas_existentes) and (rotas_existentes[rede] != proximo_salto):
                     substituir[rede] = proximo_salto
@@ -139,7 +139,7 @@ class Configuracoes:
             Log.log(f"[LOG] Rota substituída: {destino} via {salto}") if processo.returncode == 0 else Log.log(f"[LOG] Problema ao substituir rota: {processo.stderr.decode()}")
             return True
         except Exception as error:
-            Log.log(f"[LOG] Error de substituicao de rotas: {error}")
+            Log.log(f"[LOG] Erro de substituicao de rotas: {error}")
         return False
     
     @staticmethod
