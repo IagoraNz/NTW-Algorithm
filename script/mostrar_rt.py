@@ -44,7 +44,7 @@ def pegar_tRoteamento(container) -> str:
         str: Saída do comando "ip route".
     """
     cmd = f"docker exec {container} ip route"
-    print(f"{cmd}")
+    print(f"{Cores.ROXO}{cmd}{Cores.SEM_COR}")
     return os.popen(cmd).read()
 
 # ----------------------------------------------------------------------------------------------------------- #

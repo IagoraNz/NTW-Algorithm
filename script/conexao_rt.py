@@ -66,7 +66,7 @@ def ping(de, para, ip, res, thread) -> None:
     """
     ini = time.time()
     comando = f"docker exec {de} ping -c 1 -W 0.1 {ip} > /dev/null 2>&1"
-    print(f"{comando}")
+    print(f"{Cores.ROXO}{comando}{Cores.SEM_COR}")
     codigo = os.system(comando)
     fim = time.time()
     tempo = fim - ini
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     
     tarefas = [(f, t, f"172.20.{extrair_roteadores(t)}.3") for f in roteadores for t in roteadores if f != t]
     
-    print(f"{Cores.ROXO}Iniciando teste de conectividade entre roteadores...")
+    print(f"{Cores.AMARELO}Iniciando teste de conectividade entre roteadores...{Cores.SEM_COR}")
     
     res = []
     threads = []
