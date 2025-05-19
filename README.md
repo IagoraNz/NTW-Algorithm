@@ -37,6 +37,9 @@ A presente topologia pode ser visualizada no network_graph.html do projeto
 ├── 📁 script/
 │   ├── 🐍 conexao_host.py
 │   ├── 🐍 conexao_rt.py
+│   ├── 🐍 graph_build.py
+│   ├── 🐍 graph_demandas.py
+│   ├── 🐍 graph_latencia.py
 │   └── 🐍 mostrar_rt.py
 │
 ├── 📄 .gitignore
