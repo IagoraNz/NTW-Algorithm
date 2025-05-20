@@ -141,6 +141,26 @@ Cada roteador é configurado com:
   - A sub-rede do roteador anterior.
 
   - A sub-rede do roteador seguinte.
+ 
+```
+  router2:
+    environment:
+      - rtr_nome=ROUTER_2
+      - rtr_ip=172.20.2.3
+      - vizinhanca={"ROUTER_1":["172.20.1.3",1],"ROUTER_3":["172.20.3.3",1]}
+    build:
+      context: ./router
+      dockerfile: Dockerfile
+    networks:
+      sn_1:
+        ipv4_address: 172.20.1.2
+      sn_3:
+        ipv4_address: 172.20.3.4
+      sn_2:
+        ipv4_address: 172.20.2.3
+    cap_add:
+    - NET_ADMIN
+```
 
 #### HOSTS
 
@@ -152,6 +172,32 @@ Cada sub-rede possui dois hosts (por exemplo, host1_1 e host1_2), conectados exc
 
 - Dependência explícita do seu roteador (depends_on), garantindo que ele seja iniciado antes.
 
+```
+  host1_1:
+    environment:
+      - rtr_ip=172.20.1.3
+    build:
+      context: ./host
+      dockerfile: Dockerfile
+    networks:
+      sn_1:
+        ipv4_address: 172.20.1.11
+    depends_on:
+    - router1
+    cap_add:
+    - NET_ADMIN
+```
+
 #### SUB-REDES
   
 A definição das sub-redes (sn_1 a sn_6) foi feita manualmente com ipam (gerenciamento de IPs), garantindo controle total sobre os intervalos de endereçamento e evitando conflitos.
+
+```
+networks:
+  sn_1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+          gateway: 172.20.1.1
+```
