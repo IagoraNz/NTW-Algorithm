@@ -37,6 +37,9 @@ A presente topologia pode ser visualizada no network_graph.html do projeto
 ├── 📁 script/
 │   ├── 🐍 conexao_host.py
 │   ├── 🐍 conexao_rt.py
+│   ├── 🐍 graph_build.py
+│   ├── 🐍 graph_demandas.py
+│   ├── 🐍 graph_latencia.py
 │   └── 🐍 mostrar_rt.py
 │
 ├── 📄 .gitignore
@@ -111,3 +114,90 @@ Justificativa do uso do protocolo UDP em uma topologia de rede com hosts e rotea
 * **Maior flexibilidade para aplicações**:
   Como a confiabilidade pode ser tratada pela própria aplicação quando necessário, o uso do UDP permite maior controle sobre o comportamento da comunicação, adaptando-se melhor a diferentes cenários de rede.
 
+## 🔗 Construção da topologia
+A topologia da rede foi construída manualmente utilizando Docker Compose, com o objetivo de simular uma rede com múltiplas sub-redes interligadas por roteadores, onde cada sub-rede contém um roteador e dois hosts.
+
+### ⚙️ Estrutura Geral
+A rede é composta por 6 sub-redes (sn_1 a sn_6), cada uma com um intervalo de IP próprio (CIDR /24), conectadas entre si por roteadores que compartilham múltiplas interfaces de rede. Cada roteador está conectado:
+
+- À sua sub-rede local (com seus hosts).
+
+- A dois outros roteadores (topologia em anel).
+
+Essa estrutura garante que a rede tenha redundância de caminhos e suporte ao protocolo de roteamento por estado de enlace.
+
+### ⚙️ Componentes da Topologia
+
+#### ROTEADORES
+
+Cada roteador é configurado com:
+
+- Um nome identificador (rtr_nome), IP principal (rtr_ip) e uma lista de vizinhos diretos com seus IPs e custos.
+
+- Três interfaces de rede (uma por sub-rede):
+
+  - Sua sub-rede local.
+
+  - A sub-rede do roteador anterior.
+
+  - A sub-rede do roteador seguinte.
+ 
+```
+  router2:
+    environment:
+      - rtr_nome=ROUTER_2
+      - rtr_ip=172.20.2.3
+      - vizinhanca={"ROUTER_1":["172.20.1.3",1],"ROUTER_3":["172.20.3.3",1]}
+    build:
+      context: ./router
+      dockerfile: Dockerfile
+    networks:
+      sn_1:
+        ipv4_address: 172.20.1.2
+      sn_3:
+        ipv4_address: 172.20.3.4
+      sn_2:
+        ipv4_address: 172.20.2.3
+    cap_add:
+    - NET_ADMIN
+```
+
+#### HOSTS
+
+Cada sub-rede possui dois hosts (por exemplo, host1_1 e host1_2), conectados exclusivamente à sua sub-rede e com o roteador local como gateway. Cada host é configurado com:
+
+- IP fixo no intervalo .11 e .12.
+
+- Variável de ambiente rtr_ip apontando para o IP do seu roteador.
+
+- Dependência explícita do seu roteador (depends_on), garantindo que ele seja iniciado antes.
+
+```
+  host1_1:
+    environment:
+      - rtr_ip=172.20.1.3
+    build:
+      context: ./host
+      dockerfile: Dockerfile
+    networks:
+      sn_1:
+        ipv4_address: 172.20.1.11
+    depends_on:
+    - router1
+    cap_add:
+    - NET_ADMIN
+```
+
+#### SUB-REDES
+  
+A definição das sub-redes (sn_1 a sn_6) foi feita manualmente com ipam (gerenciamento de IPs), garantindo controle total sobre os intervalos de endereçamento e evitando conflitos.
+
+```
+networks:
+  sn_1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.1.0/24
+          gateway: 172.20.1.1
+```
