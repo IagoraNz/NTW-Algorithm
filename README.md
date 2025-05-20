@@ -114,3 +114,44 @@ Justificativa do uso do protocolo UDP em uma topologia de rede com hosts e rotea
 * **Maior flexibilidade para aplicações**:
   Como a confiabilidade pode ser tratada pela própria aplicação quando necessário, o uso do UDP permite maior controle sobre o comportamento da comunicação, adaptando-se melhor a diferentes cenários de rede.
 
+## 🔗 Construção da topologia
+A topologia da rede foi construída manualmente utilizando Docker Compose, com o objetivo de simular uma rede com múltiplas sub-redes interligadas por roteadores, onde cada sub-rede contém um roteador e dois hosts.
+
+### ⚙️ Estrutura Geral
+A rede é composta por 6 sub-redes (sn_1 a sn_6), cada uma com um intervalo de IP próprio (CIDR /24), conectadas entre si por roteadores que compartilham múltiplas interfaces de rede. Cada roteador está conectado:
+
+- À sua sub-rede local (com seus hosts).
+
+- A dois outros roteadores (topologia em anel).
+
+Essa estrutura garante que a rede tenha redundância de caminhos e suporte ao protocolo de roteamento por estado de enlace.
+
+### ⚙️ Componentes da Topologia
+
+#### ROTEADORES
+
+Cada roteador é configurado com:
+
+- Um nome identificador (rtr_nome), IP principal (rtr_ip) e uma lista de vizinhos diretos com seus IPs e custos.
+
+- Três interfaces de rede (uma por sub-rede):
+
+  - Sua sub-rede local.
+
+  - A sub-rede do roteador anterior.
+
+  - A sub-rede do roteador seguinte.
+
+#### HOSTS
+
+Cada sub-rede possui dois hosts (por exemplo, host1_1 e host1_2), conectados exclusivamente à sua sub-rede e com o roteador local como gateway. Cada host é configurado com:
+
+- IP fixo no intervalo .11 e .12.
+
+- Variável de ambiente rtr_ip apontando para o IP do seu roteador.
+
+- Dependência explícita do seu roteador (depends_on), garantindo que ele seja iniciado antes.
+
+#### SUB
+  
+A definição das sub-redes (sn_1 a sn_6) foi feita manualmente com ipam (gerenciamento de IPs), garantindo controle total sobre os intervalos de endereçamento e evitando conflitos.
