@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias e variáveis globais
+'''
+
 import time
 import threading
 import conexao_host
@@ -5,6 +11,12 @@ import matplotlib.pyplot as plt
 
 REQUISICOES_FIXAS = [10, 50, 100]
 ITERACOES = 50
+
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Cálculos e plotagem do gráfico
+'''
 
 resultados = {n_reqs: [] for n_reqs in REQUISICOES_FIXAS}
 

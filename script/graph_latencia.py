@@ -1,10 +1,18 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias e variáveis globais
+'''
+
 import time
 import threading
 import conexao_host
 import matplotlib.pyplot as plt
 
-MAX_TESTES = 20  # número crescente de conexões simultâneas por rodada
+MAX_TESTES = 20  # Número crescente de conexões simultâneas por rodada
 resultados = []
+
+# ----------------------------------------------------------------------------------------------------------- #
 
 for n_conexoes in range(1, MAX_TESTES + 1):
     print(f"Testando com {n_conexoes} conexões simultâneas...")
@@ -50,21 +58,21 @@ tempos_totais = [r[1] for r in resultados]
 latencias_medias = [r[2] for r in resultados]
 sucessos = [r[3] for r in resultados]
 
-plt.figure(figsize=(8, 12))  # Ajuste o tamanho para acomodar os gráficos verticalmente
+plt.figure(figsize=(8, 12))
 
-plt.subplot(2, 1, 1)  # 2 linhas, 1 coluna, primeiro gráfico
+plt.subplot(2, 1, 1)
 plt.plot(conexoes, latencias_medias, marker='o', color='black', label="Latência média (s)")
 plt.xlabel("Conexões simultâneas")
 plt.ylabel("Latência (s)")
 plt.title("Latência média vs. Conexões")
 plt.grid(True)
 
-plt.subplot(2, 1, 2)  # 2 linhas, 1 coluna, segundo gráfico
+plt.subplot(2, 1, 2)
 plt.plot(conexoes, sucessos, marker='x', color='green', label="% Sucesso")
 plt.xlabel("Conexões simultâneas")
 plt.ylabel("% Conexões bem-sucedidas")
 plt.title("Taxa de sucesso vs. Conexões")
 plt.grid(True)
 
-plt.tight_layout()  # Ajusta o espaçamento entre os gráficos
+plt.tight_layout()
 plt.show()

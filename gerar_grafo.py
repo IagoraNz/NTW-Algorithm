@@ -1,9 +1,21 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias e variáveis globais
+'''
+
 import yaml
 import networkx as nx
 import json
 from pyvis.network import Network
 from PyQt5.QtWidgets import QApplication
 import sys
+
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Script para gerar o grafo a partir do docker-compose.yml
+'''
 
 with open("docker-compose.yml", "r") as f:
     compose = yaml.safe_load(f)

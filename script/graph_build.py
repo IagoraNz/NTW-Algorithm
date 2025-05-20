@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Bibliotecas necessárias e variáveis globais
+'''
+
 import time
 import os
 import statistics
@@ -6,10 +12,16 @@ import matplotlib.pyplot as plt
 NUM_EXECUCOES = 50
 TEMPOS = []
 
+# ----------------------------------------------------------------------------------------------------------- #
+
+'''
+Cálculos e plotagem do gráfico
+'''
+
 for i in range(1, NUM_EXECUCOES + 1):
     print(f"[{i}/{NUM_EXECUCOES}] Executando: docker compose build...")
     inicio = time.time()
-    codigo = os.system("docker compose build > /dev/null 2>&1")  # ou use --no-cache se quiser
+    codigo = os.system("docker compose build > /dev/null 2>&1")
     fim = time.time()
     duracao = fim - inicio
     TEMPOS.append(duracao)
