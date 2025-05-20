@@ -152,6 +152,6 @@ Cada sub-rede possui dois hosts (por exemplo, host1_1 e host1_2), conectados exc
 
 - Dependência explícita do seu roteador (depends_on), garantindo que ele seja iniciado antes.
 
-#### SUB
+#### SUB-REDES
   
 A definição das sub-redes (sn_1 a sn_6) foi feita manualmente com ipam (gerenciamento de IPs), garantindo controle total sobre os intervalos de endereçamento e evitando conflitos.
